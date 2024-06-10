@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>time recorder</title>
+</head>
+<body>
+    <div class="container">
+        <h1>藥物時間紀錄</h1>
+        <div class="notes">
+            <div class="note-controls">
+                <div id="current-time"></div>
+                <button id="lock-btn" onclick="toggleLock()">鎖定</button>
+            </div>
+            <textarea id="notes" placeholder="在此處記錄您的備忘..."></textarea>
+        </div>
+        <div class="buttons" id="button-first">
+            <button onclick="recordTime('Bosmin')">Bosmin</button>
+            <button onclick="recordTime('Amiodarone')">Amiodarone</button>
+            <button onclick="recordTime('Atropine')">Atropine</button>
+        </div>
+        <div class="buttons">
+            <button onclick="recordTime('Aspirin')">Aspirin</button>
+            <button onclick="recordTime('NTG')">NTG</button>
+            <button onclick="recordTime('Brilinta')">Brilinta</button>
+        </div>
+        <div class="log" id="log"></div>
+        <button onclick="resetAll()">重置</button>
+    </div>
+
+
+
+
+    <script src="app.js"></script>
+</body>
+</html>
