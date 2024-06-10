@@ -30,7 +30,7 @@ function recordTime(medicine) {
     const seconds = now.getSeconds();
 
     // 將時間格式化為中式格式，去掉年份
-    const formattedTime = `${month}月${day}日 ${hours}時${minutes}分${seconds}秒`;
+    const formattedTime = `${month}月${day}日${hours}時${minutes}分${seconds}秒`;
 
     // 顯示記錄
     const logElement = document.getElementById('log'); //獲取新的日志紀錄元素
