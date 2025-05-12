@@ -3,36 +3,449 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>time recorder</title>
+    <title>藥物時間紀錄</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-dark: #2980b9;
+            --secondary-color: #e74c3c;
+            --secondary-dark: #c0392b;
+            --accent-color: #2ecc71;
+            --accent-dark: #27ae60;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', '微軟正黑體', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            margin: 0;
+            padding: 20px;
+            color: var(--dark-color);
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            max-width: 600px;
+            max-height: 95vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        h1 {
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+            font-size: 28px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 12px;
+        }
+        
+        h1:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            border-radius: 2px;
+        }
+        
+        .time-display {
+            background-color: var(--dark-color);
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .time-label {
+            color: #74b9ff;
+        }
+        
+        #current-time {
+            font-size: 24px;
+        }
+        
+        .notes {
+            margin-bottom: 15px;
+        }
+        
+        .note-controls {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 8px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 100px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            font-size: 16px;
+            transition: border 0.3s ease;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        textarea[readonly] {
+            background-color: #f8f9fa;
+            border-color: #ccc;
+        }
+        
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 12px 18px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        #button-first button {
+            background-color: var(--primary-color);
+        }
+        
+        #button-first button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .buttons button {
+            background-color: var(--accent-color);
+        }
+        
+        .buttons button:hover {
+            background-color: var(--accent-dark);
+        }
+        
+        #lock-btn {
+            background-color: var(--dark-color);
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        
+        #lock-btn:hover {
+            background-color: #2c3e50;
+        }
+        
+        button.reset-btn {
+            background-color: var(--secondary-color);
+            margin-top: 15px;
+            width: 100%;
+        }
+        
+        button.reset-btn:hover {
+            background-color: var(--secondary-dark);
+        }
+        
+        .log {
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 200px;
+            background-color: white;
+        }
+        
+        .log > div {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            opacity: 1;
+        }
+        
+        .log > div:last-child {
+            border-bottom: none;
+        }
+        
+        .button-active {
+            animation: pulse 0.3s ease;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .delete-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .delete-btn:hover {
+            background-color: var(--secondary-dark);
+        }
+        
+        .medicine-name {
+            font-weight: bold;
+            color: var(--primary-dark);
+        }
+        
+        .time-stamp {
+            color: #666;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            button {
+                padding: 10px 14px;
+                font-size: 14px;
+            }
+            
+            .time-display {
+                font-size: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>藥物時間紀錄</h1>
+        
+        <div class="time-display">
+            <span class="time-label">現在時間：</span>
+            <span id="current-time"></span>
+        </div>
+        
         <div class="notes">
             <div class="note-controls">
-                <div id="current-time"></div>
                 <button id="lock-btn" onclick="toggleLock()">鎖定</button>
             </div>
             <textarea id="notes" placeholder="在此處記錄您的備忘..."></textarea>
         </div>
-        <div class="buttons" id="button-first">
-            <button onclick="recordTime('Bosmin')">Bosmin</button>
-            <button onclick="recordTime('Amiodarone')">Amiodarone</button>
-            <button onclick="recordTime('Atropine')">Atropine</button>
+        
+        <div class="buttons-container">
+            <div class="buttons" id="button-first">
+                <button onclick="recordTime('Bosmin')">Bosmin</button>
+                <button onclick="recordTime('Amiodarone')">Amiodarone</button>
+                <button onclick="recordTime('Atropine')">Atropine</button>
+            </div>
+            
+            <div class="buttons">
+                <button onclick="recordTime('Aspirin')">Aspirin</button>
+                <button onclick="recordTime('NTG')">NTG</button>
+                <button onclick="recordTime('Brilinta')">Brilinta</button>
+            </div>
         </div>
-        <div class="buttons">
-            <button onclick="recordTime('Aspirin')">Aspirin</button>
-            <button onclick="recordTime('NTG')">NTG</button>
-            <button onclick="recordTime('Brilinta')">Brilinta</button>
-        </div>
+        
+        <h3>藥物記錄</h3>
         <div class="log" id="log"></div>
-        <button onclick="resetAll()">重置</button>
+        
+        <button class="reset-btn" onclick="resetAll()">重置所有記錄</button>
     </div>
 
+    <script>
+        //調用loadLogs和loadNotes，從localStorage
+        //等待文檔完全加載後執行
+        document.addEventListener('DOMContentLoaded', (event) => {
+            loadLogs();  //從localstorage加載日制紀錄，顯示在頁面
+            loadNotes(); //從localstorage加載備忘錄，顯示在頁面
+            setLockStatus(getLockStatusFromStorage());  // 初始設置為解鎖狀態
+            updateTime(); //更新當前時間
+            setInterval(updateTime, 1000); // 每秒更新一次時間
+        });
 
+        //更新時間並顯示
+        function updateTime() {
+            const now = new Date(); //獲取當前時間
+            const hours = now.getHours().toString().padStart(2, '0'); //格式化小時
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const currentTimeString = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('current-time').innerText = currentTimeString;
+        }
 
+        //紀錄藥物時間
+        function recordTime(medicine) {
+            const now = new Date();
+            const month = now.getMonth() + 1; // 月份從0開始，所以要加1
+            const day = now.getDate(); //獲取日期
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
 
-    <script src="app.js"></script>
+            // 將時間格式化為中式格式，去掉年份
+            const formattedTime = `${month}月${day}日 ${hours}:${minutes}:${seconds}`;
+
+            // 顯示記錄
+            const logElement = document.getElementById('log'); //獲取新的日志紀錄元素
+            const newLog = document.createElement('div'); //創建新的日志紀錄元素
+            newLog.innerHTML = `<span class="medicine-name">${medicine}</span> <span class="time-stamp">${formattedTime}</span> <span class="delete-btn" onclick="deleteLog(this)">刪除</span>`; //設置日志內容
+            
+            // 將新記錄添加到最上方
+            if (logElement.firstChild) {
+                logElement.insertBefore(newLog, logElement.firstChild);
+            } else {
+                logElement.appendChild(newLog);
+            }
+
+            // 添加一個淡入效果
+            setTimeout(() => {
+                newLog.style.opacity = "1";
+            }, 10);
+
+            // 保存至localStorage
+            saveLogs();
+            
+            // 添加視覺反饋
+            const btn = document.querySelector(`button[onclick="recordTime('${medicine}')"]`);
+            btn.classList.add('button-active');
+            setTimeout(() => {
+                btn.classList.remove('button-active');
+            }, 300);
+        }
+
+        //保存到localstorage
+        function saveLogs() {
+            const logElement = document.getElementById('log');
+            localStorage.setItem('logs', logElement.innerHTML);
+        }
+
+        //從localstorage加載
+        function loadLogs() {
+            const logs = localStorage.getItem('logs');
+            if (logs) {
+                document.getElementById('log').innerHTML = logs;
+            }
+        }
+
+        document.getElementById('notes').addEventListener('input', () => {
+            saveNotes(); //調用
+        });
+
+        //保存備忘錄到localstorage
+        function saveNotes() {
+            const notes = document.getElementById('notes').value;
+            localStorage.setItem('notes', notes);
+        }
+
+        //加載備忘錄localstorage
+        function loadNotes() {
+            const notes = localStorage.getItem('notes');
+            if (notes) {
+                document.getElementById('notes').value = notes;
+            }
+        }
+
+        function resetAll() {
+            // 清除記錄和備忘錄
+            if (confirm('您確定要重置嗎？')){
+                document.getElementById('log').innerHTML = '';
+                document.getElementById('notes').value = '';
+                localStorage.removeItem('logs');
+                localStorage.removeItem('notes');
+                setLockStatus(false); // 重置為解鎖狀態
+            }
+        }
+
+        //切換鎖定狀態
+        function toggleLock() {
+            const notes = document.getElementById('notes');
+            const isLocked = notes.hasAttribute('readonly');
+            setLockStatus(!isLocked); //!是和當前狀態相反
+        }
+
+        //鎖定狀態
+        function setLockStatus(isLocked) {
+            const lockBtn = document.getElementById('lock-btn');
+            const notes = document.getElementById('notes');
+            
+            if (isLocked) {
+                notes.setAttribute('readonly', 'true');
+                lockBtn.textContent = '解鎖';
+            } else {
+                notes.removeAttribute('readonly');
+                lockBtn.textContent = '鎖定';
+            }
+
+            localStorage.setItem('notesLocked', isLocked);
+        }
+
+        //从 localStorage 获取备忘录的锁定状态。
+        function getLockStatusFromStorage() {
+            return JSON.parse(localStorage.getItem('notesLocked')) || false;
+        }
+
+        //刪除藥物紀錄
+        function deleteLog(element) {
+            if (confirm('您確定要刪除此記錄嗎？')) {
+                element.parentElement.remove();
+                saveLogs();
+            }
+        }
+    </script>
 </body>
 </html>
